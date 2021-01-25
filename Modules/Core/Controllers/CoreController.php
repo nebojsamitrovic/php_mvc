@@ -8,6 +8,9 @@ namespace Modules\Core\Controllers;
  */
 class CoreController
 {
+    /** message variable */
+    public $message = '';
+
     /**
      * @param $viewName
      */
@@ -16,6 +19,24 @@ class CoreController
         if (file_exists(dirname(__DIR__) . '/Views/' . $viewName . '.php')) {
             require_once dirname(__DIR__) . '/Views/' . $viewName . '.php';
             die;
+        }
+    }
+
+    /**
+     * @param $route
+     */
+    public function redirect($route)
+    {
+        header('location:' . $route);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isLogged()
+    {
+        if (isset($_SESSION['userID'])) {
+            return true;
         }
     }
 

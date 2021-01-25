@@ -1,10 +1,10 @@
 <?php
 
-namespace Modules\Core\Models;
+namespace Modules\Core\Models\Connection;
 
 /**
  * Class MongoDB
- * @package Modules\Core\Models
+ * @package Modules\Core\Models\Connection
  */
 abstract class MongoDB
 {

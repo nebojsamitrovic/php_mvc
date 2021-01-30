@@ -26,9 +26,18 @@ class AuthController extends CoreController
 
     public function login()
     {
+        if(isset($_COOKIE['lock_login']) && time() < $_COOKIE['lock_login']) {
+            
+            $_SESSION['login_failed'] = 0;
+            setcookie('lock_login', time() + 600, time() + 600, "/");
+            $this->message = 'Too many failed login attempts. Please try again in 10 minutes.';
+
+            return $this->view('login_form');
+        }
+
         if ($this->isLogged()) {
 
-            $this->redirect('home');
+            return $this->redirect('home');
 
         } else if (isset($_POST['loginEmail']) && isset($_POST['loginPassword'])) {
 
@@ -39,28 +48,40 @@ class AuthController extends CoreController
 
             if($user) {
                 $_SESSION['userID'] = $user;
-                $this->redirect('home');
+                $_SESSION['login_failed'] = 0;
+
+                return $this->redirect('home');
 
             } else {
+                if(isset($_SESSION['login_failed'])) {
+                    $_SESSION['login_failed'] = $_SESSION['login_failed'] + 1;
+                    
+                    if($_SESSION['login_failed'] > 3) {
+                        setcookie('lock_login', time() + 600, time() + 600, "/");
+                    }
+                } else {
+                    $_SESSION['login_failed'] = 1;
+                }
                 $this->message = 'Login failed, wrong user credentials.';
-                $this->view('login_form');
+
+                return $this->view('login_form');
             }
         } else {
-            $this->view('login_form');
+            return $this->view('login_form');
         }
     }
 
     public function logout()
     {
         session_destroy();
-        $this->redirect('login');
+        return $this->redirect('login');
     }
 
     public function register()
     {
         if ($this->isLogged()) {
 
-            $this->redirect('home');
+            return $this->redirect('home');
 
         } else if (
             isset($_POST['registerEmail']) &&
@@ -75,22 +96,22 @@ class AuthController extends CoreController
 
             if($password !== $passwordCheck) {
                 $this->message = 'Your password and confirmation password do not match.';
-                $this->view('registration_form');
+                return $this->view('registration_form');
             }
 
             if($this->user->findUserByEmail($email)) {
                 $this->message = 'User with this email exists.';
-                $this->view('registration_form');
+                return $this->view('registration_form');
             }
 
             $user = $this->user->create($email, $username, $password);
 
             if($user) {
                 $_SESSION['userID'] = $user;
-                $this->redirect('home');
+                return $this->redirect('home');
             }
         } else {
-            $this->view('registration_form');
+            return $this->view('registration_form');
         }
     }
 }

@@ -12,9 +12,9 @@ class HomeController extends CoreController
     public function getHomepage()
     {
         if ($this->isLogged()) {
-            $this->view('home');
+            return $this->view('home');
         }
 
-        $this->redirect('login');
+        return $this->redirect('login');
     }
 }
